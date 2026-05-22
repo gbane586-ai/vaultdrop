@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VaultDrop — Digital Art Marketplace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0a;
+    --bg2: #141414;
+    --bg3: #1e1e1e;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #f0ede6;
+    --muted: #888;
+    --accent: #c8b07a;
+    --accent2: #9f7bbd;
+    --green: #4caf7d;
+    --red: #e05252;
+    --font-display: 'DM Serif Display', serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+  }
+
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 28px;
+    border-bottom: 0.5px solid var(--border);
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: var(--font-display);
+    font-size: 22px;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+
+  .logo span { color: var(--text); font-style: italic; }
+
+  .nav-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 10px;
+    padding: 4px;
+  }
+
+  .nav-tab {
+    padding: 7px 18px;
+    border-radius: 7px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+
+  .nav-tab.active {
+    background: var(--bg3);
+    color: var(--text);
+    border: 0.5px solid var(--border2);
+  }
+
+  .wallet-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg2);
+    border: 0.5px solid var(--border2);
+    border-radius: 10px;
+    padding: 8px 16px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .wallet-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+  }
+
+  .section { display: none; padding: 28px; }
+  .section.active { display: block; }
+
+  .hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+  }
+
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: 36px;
+    line-height: 1.15;
+    font-weight: 400;
+    color: var(--text);
+  }
+
+  .hero h1 em { color: var(--accent); font-style: italic; }
+  .hero p { color: var(--muted); font-size: 14px; margin-top: 6px; }
+
+  .filter-row { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+
+  .pill {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 0.5px solid var(--border2);
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--font-body);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .pill.active, .pill:hover { background: var(--accent); color: #111; border-color: var(--accent); }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; }
+
+  .card {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .card:hover { border-color: var(--border2); transform: translateY(-2px); }
+
+  .card-art {
+    width: 100%;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 64px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-badge {
+    position: absolute;
+    top: 10px; right: 10px;
+    background: rgba(0,0,0,0.6);
+    border: 0.5px solid var(--border2);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: var(--accent);
+  }
+
+  .card-body { padding: 14px; }
+  .card-title { font-family: var(--font-display); font-size: 16px; font-weight: 400; margin-bottom: 4px; }
+  .card-creator { font-size: 11px; color: var(--muted); margin-bottom: 12px; }
+  .card-footer { display: flex; align-items: center; justify-content: space-between; }
+  .price-label { font-size: 10px; color: var(--muted); }
+  .price-val { font-family: var(--font-mono); font-size: 15px; font-weight: 500; color: var(--accent); }
+
+  .buy-btn {
+    padding: 6px 14px;
+    background: var(--accent);
+    color: #111;
+    border: none;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  .buy-btn:hover { opacity: 0.85; }
+
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 32px; }
+
+  .stat-card {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+  }
+
+  .stat-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+  .stat-val { font-family: var(--font-mono); font-size: 22px; font-weight: 500; color: var(--text); }
+  .stat-change { font-size: 11px; margin-top: 4px; }
+  .up { color: var(--green); }
+  .down { color: var(--red); }
+
+  .section-heading { font-family: var(--font-display); font-size: 20px; font-weight: 400; margin-bottom: 16px; }
+
+  .collection-row { display: flex; flex-direction: column; gap: 10px; margin-bottom: 32px; }
+
+  .collection-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+
+  .collection-item:hover { border-color: var(--border2); }
+
+  .col-rank { font-family: var(--font-mono); font-size: 12px; color: var(--muted); width: 20px; text-align: center; }
+  .col-art { width: 44px; height: 44px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; }
+  .col-info { flex: 1; }
+  .col-name { font-size: 14px; font-weight: 500; }
+  .col-items { font-size: 11px; color: var(--muted); }
+  .col-stats { text-align: right; }
+  .col-vol { font-family: var(--font-mono); font-size: 14px; font-weight: 500; color: var(--accent); }
+  .col-change { font-size: 11px; }
+
+  .mypage-grid { display: grid; grid-template-columns: 260px 1fr; gap: 24px; }
+
+  .profile-card { background: var(--bg2); border: 0.5px solid var(--border); border-radius: 14px; padding: 24px; height: fit-content; }
+
+  .avatar {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    margin-bottom: 14px;
+  }
+
+  .profile-name { font-family: var(--font-display); font-size: 20px; margin-bottom: 4px; }
+  .profile-handle { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+
+  .profile-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .ps { background: var(--bg3); border-radius: 8px; padding: 10px 12px; }
+  .ps-label { font-size: 10px; color: var(--muted); }
+  .ps-val { font-family: var(--font-mono); font-size: 16px; font-weight: 500; margin-top: 2px; }
+
+  .balance { background: var(--bg3); border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+  .balance-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .balance-val { font-family: var(--font-mono); font-size: 24px; color: var(--accent); }
+
+  .action-btns { display: flex; gap: 8px; }
+
+  .action-btn {
+    flex: 1;
+    padding: 9px;
+    border-radius: 8px;
+    border: 0.5px solid var(--border2);
+    background: transparent;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .action-btn:hover { background: var(--bg3); }
+  .action-btn.primary { background: var(--accent); color: #111; border-color: var(--accent); }
+  .action-btn.primary:hover { opacity: 0.85; }
+
+  .owned-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; }
+
+  .owned-card { background: var(--bg2); border: 0.5px solid var(--border); border-radius: 12px; overflow: hidden; cursor: pointer; transition: border-color 0.15s; }
+  .owned-card:hover { border-color: var(--border2); }
+  .owned-art { width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 48px; }
+  .owned-info { padding: 10px 12px; }
+  .owned-name { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+  .owned-price { font-size: 11px; font-family: var(--font-mono); color: var(--accent); }
+
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--bg2);
+    border: 0.5px solid var(--border2);
+    border-radius: 18px;
+    padding: 28px;
+    width: 420px;
+    max-width: 95vw;
+    position: relative;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 16px; right: 16px;
+    background: var(--bg3);
+    border: 0.5px solid var(--border);
+    border-radius: 8px;
+    width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 16px;
+  }
+
+  .modal-art { width: 100%; aspect-ratio: 1.4; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 80px; margin-bottom: 18px; }
+  .modal-title { font-family: var(--font-display); font-size: 24px; margin-bottom: 4px; }
+  .modal-creator { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+
+  .modal-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 0.5px solid var(--border); font-size: 13px; }
+  .modal-row:last-of-type { border-bottom: none; }
+  .modal-row .key { color: var(--muted); }
+  .modal-row .val { font-family: var(--font-mono); }
+
+  .modal-buy {
+    width: 100%;
+    margin-top: 18px;
+    padding: 13px;
+    background: var(--accent);
+    color: #111;
+    border: none;
+    border-radius: 10px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  .modal-buy:hover { opacity: 0.85; }
+
+  .toast {
+    position: fixed;
+    bottom: 28px; right: 28px;
+    background: var(--bg3);
+    border: 0.5px solid var(--green);
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-size: 13px;
+    color: var(--text);
+    z-index: 300;
+    display: none;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .toast.show { display: flex; }
+  .toast-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+
+  .activity-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .activity-item { display: flex; align-items: center; gap: 14px; background: var(--bg2); border: 0.5px solid var(--border); border-radius: 10px; padding: 12px 16px; }
+  .act-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .act-info { flex: 1; }
+  .act-title { font-size: 13px; font-weight: 500; }
+  .act-sub { font-size: 11px; color: var(--muted); }
+  .act-price { font-family: var(--font-mono); font-size: 13px; color: var(--accent); }
+  .act-time { font-size: 11px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Vault<span>Drop</span></div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showSection('explore', this)">Explore</button>
+    <button class="nav-tab" onclick="showSection('collections', this)">Collections</button>
+    <button class="nav-tab" onclick="showSection('activity', this)">Activity</button>
+    <button class="nav-tab" onclick="showSection('my', this)">My Vault</button>
+  </div>
+  <div class="wallet-btn">
+    <div class="wallet-dot"></div>
+    <span style="font-family:var(--font-mono);font-size:12px">0x3f…8a2c</span>
+  </div>
+</nav>
+
+<div id="explore" class="section active">
+  <div class="hero">
+    <div>
+      <h1>Discover <em>rare</em><br>digital art</h1>
+      <p>Collect, trade, and own moments of pure imagination.</p>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Total Volume</div>
+      <div style="font-family:var(--font-mono);font-size:28px;color:var(--accent)">Ξ 48,291</div>
+      <div style="font-size:11px;color:var(--green)">↑ 12.4% this week</div>
+    </div>
+  </div>
+  <div class="filter-row">
+    <button class="pill active" onclick="filterArt('all', this)">All</button>
+    <button class="pill" onclick="filterArt('abstract', this)">Abstract</button>
+    <button class="pill" onclick="filterArt('surreal', this)">Surreal</button>
+    <button class="pill" onclick="filterArt('pixel', this)">Pixel Art</button>
+    <button class="pill" onclick="filterArt('generative', this)">Generative</button>
+    <button class="pill" onclick="filterArt('portrait', this)">Portrait</button>
+  </div>
+  <div class="grid" id="art-grid"></div>
+</div>
+
+<div id="collections" class="section">
+  <div class="section-heading">Top Collections</div>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-label">24h Volume</div><div class="stat-val">Ξ 1,204</div><div class="stat-change up">↑ 8.2%</div></div>
+    <div class="stat-card"><div class="stat-label">Collectors</div><div class="stat-val">38,491</div><div class="stat-change up">↑ 3.1%</div></div>
+    <div class="stat-card"><div class="stat-label">Pieces Listed</div><div class="stat-val">12,074</div><div class="stat-change down">↓ 0.4%</div></div>
+    <div class="stat-card"><div class="stat-label">Floor Price</div><div class="stat-val">Ξ 0.08</div><div class="stat-change up">↑ 5.7%</div></div>
+  </div>
+  <div class="collection-row" id="collections-list"></div>
+</div>
+
+<div id="activity" class="section">
+  <div class="section-heading">Recent Activity</div>
+  <div class="activity-list" id="activity-list"></div>
+</div>
+
+<div id="my" class="section">
+  <div class="mypage-grid">
+    <div>
+      <div class="profile-card">
+        <div class="avatar">🎨</div>
+        <div class="profile-name">Alex Mercer</div>
+        <div class="profile-handle">@alexmercer.eth</div>
+        <div class="profile-stats">
+          <div class="ps"><div class="ps-label">Collected</div><div class="ps-val" id="owned-count">3</div></div>
+          <div class="ps"><div class="ps-label">Created</div><div class="ps-val">0</div></div>
+          <div class="ps"><div class="ps-label">Listed</div><div class="ps-val">1</div></div>
+          <div class="ps"><div class="ps-label">Sold</div><div class="ps-val">0</div></div>
+        </div>
+        <div class="balance">
+          <div class="balance-label">Wallet Balance</div>
+          <div class="balance-val" id="balance-display">Ξ 5.24</div>
+        </div>
+        <div class="action-btns">
+          <button class="action-btn">Withdraw</button>
+          <button class="action-btn primary">Add Funds</button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="section-heading">My Collection</div>
+      <div class="owned-grid" id="owned-grid"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-close" onclick="closeModal()">✕</div>
+    <div class="modal-art" id="modal-art"></div>
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-creator" id="modal-creator"></div>
+    <div id="modal-rows"></div>
+    <button class="modal-buy" id="modal-buy-btn" onclick="buyItem()">Buy Now</button>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <div class="toast-dot"></div>
+  <span id="toast-msg">Purchase successful!</span>
+</div>
+
+<script>
+const artworks = [
+  { id:1, emoji:'🌀', bg:'#1a1030', title:'Recursive Dream', creator:'@nova.eth', price:0.42, rarity:'Rare', category:'abstract', edition:'#14/50' },
+  { id:2, emoji:'🏔️', bg:'#0d1e2a', title:'Alpine Echo', creator:'@terranova.eth', price:0.18, rarity:'Common', category:'surreal', edition:'#3/200' },
+  { id:3, emoji:'👁️', bg:'#1e0d1e', title:'All-Seeing', creator:'@mystic.eth', price:1.20, rarity:'Legendary', category:'portrait', edition:'#2/10' },
+  { id:4, emoji:'⚡', bg:'#0a1a0a', title:'Static Bloom', creator:'@volt.eth', price:0.09, rarity:'Common', category:'generative', edition:'#44/500' },
+  { id:5, emoji:'🌊', bg:'#0d1520', title:'Tide Memory', creator:'@coralbyte.eth', price:0.67, rarity:'Rare', category:'abstract', edition:'#7/30' },
+  { id:6, emoji:'🔮', bg:'#150d25', title:'Oracle IX', creator:'@cryptomage.eth', price:2.10, rarity:'Legendary', category:'surreal', edition:'#1/10' },
+  { id:7, emoji:'🦋', bg:'#0d1e10', title:'Metamorph', creator:'@naturegen.eth', price:0.35, rarity:'Uncommon', category:'generative', edition:'#19/100' },
+  { id:8, emoji:'🌃', bg:'#0d0d1e', title:'Neon Dusk', creator:'@pixelsmith.eth', price:0.14, rarity:'Common', category:'pixel', edition:'#88/300' },
+  { id:9, emoji:'🎭', bg:'#1e1000', title:'Dual Face', creator:'@masque.eth', price:0.55, rarity:'Rare', category:'portrait', edition:'#11/50' },
+  { id:10, emoji:'🌺', bg:'#1a0d12', title:'Blooming Void', creator:'@floraether.eth', price:0.29, rarity:'Uncommon', category:'abstract', edition:'#22/150' },
+  { id:11, emoji:'🤖', bg:'#0a1a1a', title:'Mechanoid 7', creator:'@botframe.eth', price:0.11, rarity:'Common', category:'pixel', edition:'#134/500' },
+  { id:12, emoji:'🌙', bg:'#0d0d10', title:'Luna Codex', creator:'@nightmath.eth', price:0.88, rarity:'Rare', category:'generative', edition:'#5/40' },
+];
+
+const collections = [
+  { emoji:'🌀', bg:'#1a1030', name:'Dreamscapes', items:50, vol:'Ξ 12.4', change:'+24%', up:true },
+  { emoji:'👁️', bg:'#1e0d1e', name:'Eye of the Machine', items:10, vol:'Ξ 9.8', change:'+11%', up:true },
+  { emoji:'🔮', bg:'#150d25', name:'Oracle Series', items:10, vol:'Ξ 8.1', change:'-3%', up:false },
+  { emoji:'🌊', bg:'#0d1520', name:'Tide Memories', items:30, vol:'Ξ 5.6', change:'+18%', up:true },
+  { emoji:'🦋', bg:'#0d1e10', name:'Metamorphic', items:100, vol:'Ξ 3.2', change:'+6%', up:true },
+  { emoji:'🌙', bg:'#0d0d10', name:'Luna Codex', items:40, vol:'Ξ 2.9', change:'-1%', up:false },
+];
+
+const activities = [
+  { emoji:'💰', bg:'#0a1a0a', title:'Recursive Dream sold', sub:'@nova.eth → @collector22.eth', price:'Ξ 0.42', time:'2m ago' },
+  { emoji:'📋', bg:'#0d0d10', title:'Oracle IX listed', sub:'@cryptomage.eth', price:'Ξ 2.10', time:'14m ago' },
+  { emoji:'🔄', bg:'#0d1520', title:'Offer on Tide Memory', sub:'@wavemaker.eth', price:'Ξ 0.50', time:'31m ago' },
+  { emoji:'💰', bg:'#1a1030', title:'Alpine Echo sold', sub:'@terranova.eth → @mtnlvr.eth', price:'Ξ 0.18', time:'1h ago' },
+  { emoji:'✨', bg:'#1e0d1e', title:'Blooming Void minted', sub:'@floraether.eth', price:'Ξ 0.29', time:'2h ago' },
+  { emoji:'📋', bg:'#0a1a1a', title:'Mechanoid 7 listed', sub:'@botframe.eth', price:'Ξ 0.11', time:'3h ago' },
+  { emoji:'💰', bg:'#0d1e10', title:'Metamorph sold', sub:'@naturegen.eth → @butterfly.eth', price:'Ξ 0.35', time:'5h ago' },
+];
+
+let balance = 5.24;
+let ownedIds = [3, 6, 12];
+let currentItem = null;
+let activeFilter = 'all';
+
+function rarityColor(r) {
+  if (r === 'Legendary') return '#c8a850';
+  if (r === 'Rare') return '#9f7bbd';
+  if (r === 'Uncommon') return '#4caf7d';
+  return '#888';
+}
+
+function renderGrid(filter) {
+  const grid = document.getElementById('art-grid');
+  const items = filter === 'all' ? artworks : artworks.filter(a => a.category === filter);
+  grid.innerHTML = items.map(a => `
+    <div class="card" onclick="openModal(${a.id})">
+      <div class="card-art" style="background:${a.bg}">
+        <span style="font-size:64px">${a.emoji}</span>
+        <div class="card-badge">${a.rarity}</div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">${a.title}</div>
+        <div class="card-creator">${a.creator} · ${a.edition}</div>
+        <div class="card-footer">
+          <div>
+            <div class="price-label">Current Price</div>
+            <div class="price-val">Ξ ${a.price.toFixed(2)}</div>
+          </div>
+          ${ownedIds.includes(a.id)
+            ? `<div style="font-size:11px;color:var(--green);font-weight:500">✓ Owned</div>`
+            : `<button class="buy-btn" onclick="event.stopPropagation();openModal(${a.id})">Buy</button>`}
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterArt(cat, el) {
+  activeFilter = cat;
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  renderGrid(cat);
+}
+
+function renderCollections() {
+  document.getElementById('collections-list').innerHTML = collections.map((c, i) => `
+    <div class="collection-item">
+      <div class="col-rank">${i+1}</div>
+      <div class="col-art" style="background:${c.bg}">${c.emoji}</div>
+      <div class="col-info">
+        <div class="col-name">${c.name}</div>
+        <div class="col-items">${c.items} items</div>
+      </div>
+      <div class="col-stats">
+        <div class="col-vol">${c.vol}</div>
+        <div class="col-change ${c.up ? 'up' : 'down'}">${c.change}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderActivity() {
+  document.getElementById('activity-list').innerHTML = activities.map(a => `
+    <div class="activity-item">
+      <div class="act-icon" style="background:${a.bg}">${a.emoji}</div>
+      <div class="act-info">
+        <div class="act-title">${a.title}</div>
+        <div class="act-sub">${a.sub}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="act-price">${a.price}</div>
+        <div class="act-time">${a.time}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderOwned() {
+  const owned = artworks.filter(a => ownedIds.includes(a.id));
+  document.getElementById('owned-grid').innerHTML = owned.map(a => `
+    <div class="owned-card" onclick="openModal(${a.id})">
+      <div class="owned-art" style="background:${a.bg}">${a.emoji}</div>
+      <div class="owned-info">
+        <div class="owned-name">${a.title}</div>
+        <div class="owned-price">Ξ ${a.price.toFixed(2)}</div>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('owned-count').textContent = ownedIds.length;
+}
+
+function openModal(id) {
+  const a = artworks.find(x => x.id === id);
+  currentItem = a;
+  const owned = ownedIds.includes(id);
+  document.getElementById('modal-art').style.background = a.bg;
+  document.getElementById('modal-art').innerHTML = `<span style="font-size:80px">${a.emoji}</span>`;
+  document.getElementById('modal-title').textContent = a.title;
+  document.getElementById('modal-creator').textContent = `by ${a.creator} · ${a.edition}`;
+  document.getElementById('modal-rows').innerHTML = `
+    <div class="modal-row"><span class="key">Price</span><span class="val" style="color:var(--accent)">Ξ ${a.price.toFixed(2)}</span></div>
+    <div class="modal-row"><span class="key">Rarity</span><span class="val" style="color:${rarityColor(a.rarity)}">${a.rarity}</span></div>
+    <div class="modal-row"><span class="key">Category</span><span class="val">${a.category.charAt(0).toUpperCase()+a.category.slice(1)}</span></div>
+    <div class="modal-row"><span class="key">Edition</span><span class="val">${a.edition}</span></div>
+    <div class="modal-row"><span class="key">Blockchain</span><span class="val">Ethereum</span></div>
+  `;
+  const btn = document.getElementById('modal-buy-btn');
+  if (owned) {
+    btn.textContent = '✓ In Your Collection';
+    btn.style.background = 'var(--bg3)';
+    btn.style.color = 'var(--green)';
+    btn.disabled = true;
+  } else {
+    btn.textContent = `Buy Now · Ξ ${a.price.toFixed(2)}`;
+    btn.style.background = 'var(--accent)';
+    btn.style.color = '#111';
+    btn.disabled = false;
+  }
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('modal-overlay')) {
+    document.getElementById('modal-overlay').classList.remove('open');
+  }
+}
+
+function buyItem() {
+  if (!currentItem || ownedIds.includes(currentItem.id)) return;
+  if (balance < currentItem.price) { showToast('Insufficient balance!', false); return; }
+  balance = Math.round((balance - currentItem.price) * 100) / 100;
+  ownedIds.push(currentItem.id);
+  document.getElementById('balance-display').textContent = 'Ξ ' + balance.toFixed(2);
+  closeModal();
+  renderGrid(activeFilter);
+  renderOwned();
+  showToast(`${currentItem.title} added to your collection!`);
+}
+
+function showToast(msg, success = true) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.style.borderColor = success ? 'var(--green)' : 'var(--red)';
+  t.querySelector('.toast-dot').style.background = success ? 'var(--green)' : 'var(--red)';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function showSection(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+}
+
+renderGrid('all');
+renderCollections();
+renderActivity();
+renderOwned();
+</script>
+</body>
+</html>
